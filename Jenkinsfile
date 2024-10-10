@@ -2,9 +2,10 @@ pipeline {
     agent any
 
     environment {
-        NETLIFY_SITE_ID = '88a0d342-4266-47a8-bad1-1ca0860e19f8'
+        NETLIFY_SITE_ID = 'PUT YOUR NETLIFY SITE ID HERE'
         NETLIFY_AUTH_TOKEN = credentials('netlify-token')
     }
+
     stages {
 
         stage('Build') {
@@ -12,7 +13,6 @@ pipeline {
                 docker {
                     image 'node:18-alpine'
                     reuseNode true
-                    args '-u root:root'
                 }
             }
             steps {
@@ -56,7 +56,6 @@ pipeline {
                         docker {
                             image 'mcr.microsoft.com/playwright:v1.39.0-jammy'
                             reuseNode true
-                            args '-u root:root'
                         }
                     }
 
@@ -71,7 +70,7 @@ pipeline {
 
                     post {
                         always {
-                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright Local', reportTitles: '', useWrapperFileDirectly: true])
                         }
                     }
                 }
@@ -94,6 +93,32 @@ pipeline {
                     node_modules/.bin/netlify status
                     node_modules/.bin/netlify deploy --dir=build --prod
                 '''
+            }
+        }
+
+        stage('Prod E2E') {
+            agent {
+                docker {
+                    image 'mcr.microsoft.com/playwright:v1.39.0-jammy'
+                    reuseNode true
+                    args '-u root:root'
+                }
+            }
+
+            environment {
+                CI_ENVIRONMENT_URL = 'PUT YOUR NETLIFY SITE URL HERE'
+            }
+
+            steps {
+                sh '''
+                    npx playwright test  --reporter=html
+                '''
+            }
+
+            post {
+                always {
+                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright E2E', reportTitles: '', useWrapperFileDirectly: true])
+                }
             }
         }
     }
