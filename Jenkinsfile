@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        NETLIFY_SITE_ID = 'PUT YOUR NETLIFY SITE ID HERE'
+        NETLIFY_SITE_ID = '88a0d342-4266-47a8-bad1-1ca0860e19f8'
         NETLIFY_AUTH_TOKEN = credentials('netlify-token')
     }
 
@@ -108,7 +108,7 @@ pipeline {
             }
 
             environment {
-                CI_ENVIRONMENT_URL = 'PUT YOUR NETLIFY SITE URL HERE'
+                CI_ENVIRONMENT_URL = 'https://moonlit-fenglisu-13cd0d.netlify.app'
             }
 
             steps {
